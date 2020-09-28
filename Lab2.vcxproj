@@ -152,12 +152,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Lab2.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Lab2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Lab2.rc" />
@@ -165,6 +161,9 @@
   <ItemGroup>
     <Image Include="Lab2.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Lab2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

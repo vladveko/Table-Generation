@@ -6,6 +6,8 @@
 
 #define WIDTH 800
 #define HEIGHT 600
+#define COLUMNS 4
+#define ROWS 5
 
 // Global variables
 
@@ -21,6 +23,9 @@ HINSTANCE hInst;
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+void DrawVBorders(HDC hdc, int wndWidth, int wndHeight);
+void DrawHBorders(HDC hdc, int wndWidth, int wndHeight);
+void DrawTable(HDC hdc, int wndWidth, int wndHeight);
 
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance,
@@ -39,7 +44,7 @@ int CALLBACK WinMain(
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+	wcex.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
@@ -109,9 +114,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
+
 	RECT r;
-	short delta, fwkey;
-	int mouseX, mouseY;
+	if (!GetClientRect(hWnd, &r))
+		GetLastError();
 
 	switch (message)
 	{
@@ -122,7 +128,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Here your application is laid out.
 		// For this introduction, we just print out "Hello, Windows desktop!"
 		// in the top left corner.
-		
+		hdc = BeginPaint(hWnd, &ps);
+		DrawTable(hdc, r.right, r.bottom);
+		EndPaint(hWnd, &ps);
 		// End application-specific layout section.
 		break;
 
@@ -136,4 +144,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 
 	return 0;
+}
+
+void DrawVBorders(HDC hdc, int wndWidth, int wndHeight) {
+	int cWidth = wndWidth / COLUMNS;
+
+	for (int i = 1; i < COLUMNS; i++) {
+		MoveToEx(hdc, i * cWidth, 0, NULL);
+		LineTo(hdc, i * cWidth, wndHeight);
+	}
+}
+
+void DrawHBorders(HDC hdc, int wndWidth, int wndHeight) {
+	int rHeight = wndHeight / ROWS;
+
+	for (int i = 1; i < ROWS; i++) {
+		MoveToEx(hdc, 0, i * rHeight, NULL);
+		LineTo(hdc, wndWidth, i * rHeight);
+	}
+}
+
+void DrawTable(HDC hdc, int wndWidth, int wndHeight) {
+	DrawVBorders(hdc, wndWidth, wndHeight);
+	DrawHBorders(hdc, wndWidth, wndHeight);
 }
