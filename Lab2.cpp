@@ -1,13 +1,16 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
+#include <iostream>
 #include <tchar.h>
+#include "vector"
+#include <fstream>
+using namespace std;
 
 #define WIDTH 800
 #define HEIGHT 600
 #define COLUMNS 4
-#define ROWS 5
 
 // Global variables
 
@@ -21,11 +24,14 @@ static TCHAR szImageName[] = _T("LogoImage");
 
 HINSTANCE hInst;
 
+vector<string> textArr;
+
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void DrawVBorders(HDC hdc, int wndWidth, int wndHeight);
-void DrawHBorders(HDC hdc, int wndWidth, int wndHeight);
+void DrawHBorder(HDC hdc, int wndWidth, int wndHeight);
 void DrawTable(HDC hdc, int wndWidth, int wndHeight);
+int ReadFile();
 
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance,
@@ -94,6 +100,15 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	if (ReadFile()) {
+		MessageBox(NULL,
+			_T("Call to ReadFile failed!"),
+			_T("Windows Desktop App"),
+			NULL);
+
+		return 1;
+	}
+
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
@@ -146,25 +161,65 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void DrawVBorders(HDC hdc, int wndWidth, int wndHeight) {
-	int cWidth = wndWidth / COLUMNS;
-
+void DrawVBorders(HDC hdc, int cWidth, int wndHeight) {
 	for (int i = 1; i < COLUMNS; i++) {
 		MoveToEx(hdc, i * cWidth, 0, NULL);
 		LineTo(hdc, i * cWidth, wndHeight);
 	}
 }
 
-void DrawHBorders(HDC hdc, int wndWidth, int wndHeight) {
-	int rHeight = wndHeight / ROWS;
-
-	for (int i = 1; i < ROWS; i++) {
-		MoveToEx(hdc, 0, i * rHeight, NULL);
-		LineTo(hdc, wndWidth, i * rHeight);
-	}
+void DrawHBorder(HDC hdc, int wndWidth, int rHeight) {
+	MoveToEx(hdc, 0, rHeight, NULL);
+	LineTo(hdc, wndWidth, rHeight);
 }
 
 void DrawTable(HDC hdc, int wndWidth, int wndHeight) {
-	DrawVBorders(hdc, wndWidth, wndHeight);
-	DrawHBorders(hdc, wndWidth, wndHeight);
+	/*DrawVBorders(hdc, wndWidth, wndHeight);
+	DrawHBorders(hdc, wndWidth, wndHeight);*/
+	int cWidth = wndWidth / COLUMNS;
+	int rowOffset = 0;
+	DrawVBorders(hdc, cWidth, wndHeight);
+
+	for (int strIndex = 0; strIndex < textArr.size(); strIndex++) {
+		int maxTextHeight = 0;
+		RECT r;
+		r.top = rowOffset + 5;
+		r.bottom = wndHeight;
+
+		for (int cIndex = 0; cIndex < COLUMNS && strIndex < textArr.size(); cIndex++) {
+			r.left = cIndex * cWidth + 5;
+			r.right = (cIndex + 1) * cWidth - 5;
+			
+
+			const CHAR* str = textArr[strIndex++].c_str();
+			int len = strlen(str);
+
+			int currTextHeight = DrawTextA(hdc, (LPCSTR)str, strlen(str), &r, DT_VCENTER | DT_WORDBREAK | DT_NOCLIP | DT_EDITCONTROL);
+
+			if (currTextHeight > maxTextHeight)
+				maxTextHeight = currTextHeight;
+		}
+
+		rowOffset += maxTextHeight + 5;
+		DrawHBorder(hdc, wndWidth, rowOffset);
+	}
+}
+
+int ReadFile() {
+	ifstream file("test.txt", ios::in);
+
+	if (!file) {
+		return -1;
+	}
+
+	string out;
+	while (!file.eof()) {
+		getline(file, out);
+		if (!out.empty()) {
+			textArr.push_back(out);
+		}
+	}
+
+	file.close();
+	return 0;
 }
