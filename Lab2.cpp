@@ -10,7 +10,7 @@ using namespace std;
 
 #define WIDTH 800
 #define HEIGHT 600
-#define COLUMNS 4
+#define COLUMNS 5
 
 // Global variables
 
@@ -174,12 +174,15 @@ void DrawHBorder(HDC hdc, int wndWidth, int rHeight) {
 }
 
 void DrawTable(HDC hdc, int wndWidth, int wndHeight) {
-	/*DrawVBorders(hdc, wndWidth, wndHeight);
-	DrawHBorders(hdc, wndWidth, wndHeight);*/
 	int cWidth = wndWidth / COLUMNS;
+	
+	/* Defines the top y coordinate of the current drawing row */
 	int rowOffset = 0;
 	DrawVBorders(hdc, cWidth, wndHeight);
 
+	/* cIndex defines the number of current column 
+	The table is being filled row by row. 
+	After each iteration the max cell height in the row is being calculated and bottom border is being drawn. */
 	for (int strIndex = 0; strIndex < textArr.size(); strIndex++) {
 		int maxTextHeight = 0;
 		RECT r;
@@ -189,10 +192,8 @@ void DrawTable(HDC hdc, int wndWidth, int wndHeight) {
 		for (int cIndex = 0; cIndex < COLUMNS && strIndex < textArr.size(); cIndex++) {
 			r.left = cIndex * cWidth + 5;
 			r.right = (cIndex + 1) * cWidth - 5;
-			
 
 			const CHAR* str = textArr[strIndex++].c_str();
-			int len = strlen(str);
 
 			int currTextHeight = DrawTextA(hdc, (LPCSTR)str, strlen(str), &r, DT_VCENTER | DT_WORDBREAK | DT_NOCLIP | DT_EDITCONTROL);
 
